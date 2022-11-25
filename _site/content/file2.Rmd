@@ -1,9 +1,71 @@
 ---
-title: "File 2"
-output:   
-  html_document: 
-    df_print: paged
-    code_download: true
+title: "Mind in the Holographic Field"
+subtitle: "A Panvibrational Reduction Base for Consciousness"
+author: "Edward F Hillenaar, MSc. "
+date: "`r Sys.Date()`"
+links:
+- icon: github
+  icon_pack: fab
+  name: github-data
+  url: https://github.com/EdwardHill15/Data.git/
+- icon: youtube
+  icon_pack: fab
+  name: Video
+  url: https://www.youtube.com/watch?v=NHMip21Hkp0&t=26s
+- icon: ""
+  icon_pack: fab
+  name: slides
+  url: https://edwardhill-xaringan-decks.netlify.app/robbins71#1
+bibliography: ["ref.bib"]
+biblio-style: "apalike"
+link-citations: true
 ---
 
-This is my second file.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{css echo = FALSE}
+  body {
+    background-color: darkgrey;
+    <!-- filter: invert(1); -->
+    color: white;
+    font-size: 1.2vw;
+}
+```
+# **Introduction**
+
+This ontology of mind and consciousness postulates a **reduction base** by which it can explain how an **image of the external world** is created and experienced. The **panvibrational reduction base** explains and formulates which **psycho-physical laws** are involved (f.e.; Gibson's invariance laws, optical flow fields, etc.) that explain the generation and perception of a **holographic image** of external events and happenings in, by and of the human mind. 
+
+In this ontology of mind and consciousness, the reduction base is called "**Panvibration**" and the underlying crucial psycho-physical laws were first formulated by the late psychologist James Gibson and his work on the nature and psycho-physical mechanisms of **visual perception** [@Gibson1950]. The Philosophy of Mind of Henri Bergson [@Bergson1911], [@Bergson1910a], [@Bergson1922] also plays a fundamental role in this ontological theory with the **ultimate metaphysical goal** of solving the "**Hard Problem of Consciousness**" [@Chalmers1995]. 
+ 
+ 
+Other references:  [@Chalmers1995a], [@RobertLawrenceKuhn2020]
+
+# **Data**
+
+![Correlation Matrix of behaviour factors](https://raw.githubusercontent.com/EdwardHill15/Data/main/graphs/cor_matrix_Beh_cons.png)
+
+![Behaviour Factors in relation to Consciousness Levels](https://raw.githubusercontent.com/EdwardHill15/Data/main/graphs/plot_behaviour_consciousness.png)
+
+
+
+
+![bar graph consciousness and nvm factors in total group](https://raw.githubusercontent.com/EdwardHill15/Data/main/Prima%20Experientia/bar2_t.png)
+
+![bargraph of consciousness and nvm factors in women](https://raw.githubusercontent.com/EdwardHill15/Data/main/Prima%20Experientia/bar1_f.png)
+
+![bargraph of consciousness and nvm factors in men](https://raw.githubusercontent.com/EdwardHill15/Data/main/Prima%20Experientia/bar1_m.png)
+
+![scatterplot consciousness in relation to negativism and somatization in total group](https://raw.githubusercontent.com/EdwardHill15/Data/main/Prima%20Experientia/Scatter_t2_natural.png)
+
+![scatterplot male - female differences in consciousness in total nvm group](https://raw.githubusercontent.com/EdwardHill15/Data/main/Prima%20Experientia/Scatter_t2_mf_natural.png)
+
+![Animation consiousness and somatization in total nvm group](https://raw.githubusercontent.com/EdwardHill15/Data/main/Prima%20Experientia/consciousness_som.gif)
+
+![jitterplot of consciousness and somatization in total group](https://raw.githubusercontent.com/EdwardHill15/Data/main/Prima%20Experientia/jitter_som2.png)
+
+# **Conclusion**
+
+# **References**
+

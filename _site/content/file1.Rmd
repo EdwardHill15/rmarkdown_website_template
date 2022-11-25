@@ -1,9 +1,459 @@
 ---
-title: "File 1"
-output:   
-  html_document: 
-    df_print: paged
-    code_download: true
+author: Edward F. Hillenaar, MSc. 
+categories:
+- temperature
+date: "2022-07-22"
+draft: false
+excerpt: Climate change in the Netherlands between 1901 and 2022
+layout: single
+subtitle: Temperature, Precipitation and Snowfall in the Netherlands between 1901 and 2022
+title: Climate change in The Netherlands between 1901 and 2022
+external_link: ""
+image:
+  caption: Temprature
+  focal_point: Smart
+links:
+- icon: github
+  icon_pack: fab
+  name: github-data
+  url: https://github.com/EdwardHill15/climate_viz
+url_code: ""
+url_pdf: ""
+url_slides: ""
+url_video: ""
 ---
 
-This is my first file.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(glue)
+library(lubridate)
+library(glue)
+library(ggtext)
+library(scales)
+```
+
+
+```{css echo = FALSE}
+  body {
+    background-color: darkgrey;
+    <!-- filter: invert(1); -->
+    color: white;
+    font-size: 1.2vw;
+}
+```
+
+# Introduction
+
+There's a slight temperature rise measured in the Netherlands between 1901 and 2022. Though the maximum temperatures near 37 degrees of Celsius were also measured respectively 15, 30, 50 and 60 years ago. 
+
+Source:1.  Source: KNMI weather station De Bilt in The Netherlands (NLM00006260)
+2. https://github.com/EdwardHill15/climate_viz
+
+# Data
+
+## Scraping weather data from the internet with R and the tidyverse (CC231)
+
+* https://riffomonas.org/code_club/2022-07-18-local-weather
+
+## Finding a Weather Station
+
+* https://ncei.noaa.gov/cdo-web/
+
+## Weather Station KNMI De Bilt The Netherlands
+
+* https://www.knmi.nl/home
+
+```{r include=FALSE}
+inventory_url <- "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-inventory.txt"
+
+inventory <- read_table(inventory_url, 
+           col_names = c("station", "lat", "lon", "variable", "start", "end"))
+
+
+my_lat <- 52.13 * 2 * pi / 360
+my_lon <- 5.29 * 2 * pi / 360
+
+
+inventory <- inventory %>% 
+  mutate(lat_r = lat*2*pi/360,
+         lon_r = lon*2*pi/360,
+         d = 3963 * acos((sin(lat_r) * sin(my_lat)) + 
+                           cos(lat_r) * cos(my_lat) *
+                           cos(my_lon - lon_r)))
+
+```
+
+<!-- # mutate miles into km with * 1.609344 -->
+```{r include=FALSE}
+my_station <- inventory %>% 
+  mutate(lat_r = lat*2*pi/360,
+         lon_r = lon*2*pi/360,
+         d = 1.609344 * 3963 * acos((sin(lat_r) * sin(my_lat)) + 
+                           cos(lat_r) * cos(my_lat) *
+                           cos(my_lon - lon_r))) %>% 
+  filter(start < 1960 & end > 2020) %>% 
+  top_n(n = -1, d) %>% 
+  distinct(station) %>% 
+  pull(station)
+```
+
+## Get and tidy local weather station data (from: "NLE00100501")
+
+```{r include=FALSE}
+station_daily <- glue("https://www.ncei.noaa.gov/pub/data/ghcn/daily/by_station/{my_station}.csv.gz")
+
+df <- read_csv(station_daily,
+         col_names = c("station", "date", "variable", "value", "a", "b", "c", "d")) %>% 
+  select(date, variable, value) %>% 
+  pivot_wider(names_from = "variable", values_from = "value",
+              values_fill = 0) %>% 
+  select(date, TMAX, TMIN, PRCP)
+
+```
+
+# Statistical Analysis and plots
+
+## Figure 1: Maximum Temperature in The Netherlands between 1901 and 2022
+
+```{r echo=FALSE}
+df <- df %>% 
+  mutate(date = ymd(date))
+  
+NE_max <- aggregate(TMAX~year(date), df, max)
+NE_max$TMAX <- NE_max$TMAX / 10
+colnames(NE_max) <- c("year", "temp")
+NE_max %>% 
+  ggplot(aes(x=year, y=temp, color = temp)) +
+  geom_point(size = 9, alpha = .7) +
+  geom_smooth(method = "lm", formula = y ~x, se = FALSE, color = "gray") +
+  scale_color_viridis_c(option = ("magma")) +
+  # scale_color_gradient2(low = "blue", mid = "white", high = "red",
+  #                       midpoint = 13.5) + 
+#coord_cartesian(xlim=c(10,16)) +
+#coord_cartesian(expand=TRUE) +
+  scale_y_continuous(breaks = seq(27.5, 37.5, 2.5),
+                   limits = c(26, 37.5)) +
+  scale_x_continuous(breaks = seq(1901, 2022, 22),
+                     limits = c(1901, 2023)) +
+  labs(y = "Temperature in (\u00B0 C)", 
+     x = NULL,
+     title = "Maximum Temperature The Netherlands",
+     subtitle = "Temperature is colored by the size of the maximum temperature value",
+     caption = "Source: KNMI weather station De Bilt in The Netherlands (NLM00006260)") +
+  theme(
+    plot.background = element_rect(fill = "black", color = "black"),
+    panel.background = element_rect(fill = "black"),
+    plot.title = element_text(color = "white", face = "bold", size = 25),
+    plot.subtitle = element_text(color = "gray", size =15),
+    plot.title.position = "plot",
+    plot.caption = element_text(color = "white", size = 12),
+    axis.text = element_text(color = "white", size = 15),
+    axis.title = element_text(color = "white", size = 15),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "gray", size = 0.25),
+    panel.grid.minor.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.background = element_rect(fill = "black"),
+    legend.text = element_text(color = "white", size = 6),
+    legend.title = element_text(color = "white"),
+    legend.position = "bottom")
+
+```
+
+## Figure 2: Mean Temperature in The Netherlands between 1901 and 2022
+
+```{r echo=FALSE}
+NE_mean <- aggregate(TMAX~year(date), df, mean)
+NE_mean$TMAX <- NE_mean$TMAX / 10
+colnames(NE_mean) <- c("year", "temp")
+NE_mean$temp <- round(NE_mean$temp, 1)
+
+NE_mean %>% 
+  ggplot(aes(x=year, y=temp, color = temp)) +
+  geom_point(size = 9, alpha = .7) +
+  geom_smooth(method = "lm", formula = y ~x, se = FALSE, color = "gray") +
+  scale_color_viridis_c(option = ("viridis")) +
+  # scale_color_gradient2(low = "blue", mid = "white", high = "red",
+  #                       midpoint = 13.5) + 
+  #coord_cartesian(xlim=c(10,16)) +
+  #coord_cartesian(expand=TRUE) +
+  scale_y_continuous(breaks = seq(11.5, 16, 1.5),
+                     limits = c(11.5, 16)) +
+  scale_x_continuous(breaks = seq(1901, 2022, 22),
+                     limits = c(1901, 2023)) +
+  labs(y = "Temperature in (\u00B0 C)", 
+       x = NULL,
+       title = "Mean Temperature in The Netherlands",
+     subtitle = "Temperature is colored by the size of the maximum temperature value",
+     caption = "Source: KNMI weather station De Bilt in The Netherlands (NLM00006260)") +
+  theme(
+    plot.background = element_rect(fill = "black", color = "black"),
+    panel.background = element_rect(fill = "black"),
+    plot.title = element_text(color = "white", face = "bold", size = 25),
+    plot.subtitle = element_text(color = "gray", size =15),
+    plot.title.position = "plot",
+    plot.caption = element_text(color = "white", size = 12),
+    axis.text = element_text(color = "white", size = 15),
+    axis.title = element_text(color = "white", size = 15),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "gray", size = 0.25),
+    panel.grid.minor.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.background = element_rect(fill = "black"),
+    legend.text = element_text(color = "white", size = 6),
+    legend.title = element_text(color = "white"),
+    legend.position = "bottom")
+```
+
+## Figure 3: Precipitation in The Netherlands between 1901 and 2022
+
+```{r echo=FALSE}
+NE_prcp <- aggregate(PRCP~year(date), df, max)
+NE_prcp$PRCP <- NE_prcp$PRCP / 10
+colnames(NE_prcp) <- c("year", "prcp")
+NE_prcp$prcp <- round(NE_prcp$prcp, 1)
+NE_prcp <- NE_prcp[-c(1:5),]
+NE_prcp %>% 
+  ggplot(aes(x=year, y=prcp, color = prcp)) +
+  geom_point(size = 9, alpha = .7) +
+  geom_smooth(method = "lm", formula = y ~x, se = FALSE, color = "gray") +
+  scale_color_viridis_c(option = ("mako")) +
+  # scale_color_gradient2(low = "blue", mid = "white", high = "red",
+  #                       midpoint = 13.5) + 
+  #coord_cartesian(xlim=c(10,16)) +
+  #coord_cartesian(expand=TRUE) +
+  scale_y_continuous(breaks = seq(15, 65, 10),
+                     limits = c(15, 65)) +
+  scale_x_continuous(breaks = seq(1901, 2022, 22),
+                     limits = c(1901, 2023)) +
+  labs(y = "Precipitation in mm.", 
+       x = NULL,
+       title = "Precipitation in The Netherlands",
+     subtitle = "Temperature is colored by the size of the maximum temperature value",
+     caption = "Source: KNMI weather station De Bilt in The Netherlands (NLM00006260)") +
+  theme(
+    plot.background = element_rect(fill = "black", color = "black"),
+    panel.background = element_rect(fill = "black"),
+    plot.title = element_text(color = "white", face = "bold", size = 25),
+    plot.subtitle = element_text(color = "gray", size =15),
+    plot.title.position = "plot",
+    plot.caption = element_text(color = "white", size = 12),
+    axis.text = element_text(color = "white", size = 15),
+    axis.title = element_text(color = "white", size = 15),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "gray", size = 0.25),
+    panel.grid.minor.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.background = element_rect(fill = "black"),
+    legend.text = element_text(color = "white", size = 6),
+    legend.title = element_text(color = "white"),
+    legend.position = "bottom")
+```
+
+## Figure 4: Through July 29th, the cumulative precipitation in The Netherlands 
+
+```{r}
+Sys.setlocale("LC_TIME", "English")
+this_year <- year(today())
+this_month <- month(today(), label = TRUE, abbr = FALSE)
+this_day <- ordinal(day(today()))
+
+local_weather <- df
+colnames(local_weather) <- c("date", "tmax", "tmin", "prcp")
+local_weather <- local_weather %>% 
+  mutate(prcp_cm = prcp/10)
+local_weather <- local_weather[-4]
+colnames(local_weather) <- c("date", "tmax", "tmin", "prcp")
+
+local_weather %>% 
+  select(date, prcp) %>% 
+  drop_na(prcp) %>% 
+  mutate(year = year(date),
+         month = month(date),
+         day = day(date),
+         is_this_year = year == this_year) %>% 
+  filter(!(month == 2 & day == 29)) %>% 
+  group_by(year) %>% 
+  mutate(cum_prcp = cumsum(prcp)) %>% 
+  filter(cum_prcp > 0) %>% 
+  ungroup() %>% 
+  mutate(new_date = ymd(glue("2022-{month}-{day}"))) %>% 
+  ggplot(aes(x=new_date, y=cum_prcp, group = year, color=is_this_year,
+             size = is_this_year)) +
+  geom_line(show.legend = FALSE) +
+  geom_smooth(aes(group = 1), color = "darkred", size = 0.5) +
+  scale_color_manual(breaks = c(F,T),
+                     values = c("lightgray", "dodgerblue")) +
+  scale_size_manual(breaks = c(F,T),
+                    values = c(0.3,1)) +
+  scale_x_date(date_labels = "%B", date_breaks = "2 months") +
+  scale_y_continuous(breaks = seq(0, 1200, 300),
+                     labels = seq(0, 120, 30),
+                     limits = c(0,1200),
+                     expand = c(0,0)) +
+  labs(x = NULL,
+       y = "Cumulative precipitation (cm)",
+       title = glue("Through {this_month} {this_day}, the cumulative precipitation in The Netherlands near De Bilt is <span style = 'color: dodgerblue'>above</span> <span style = 'color: darkred'>average</span> for {this_year}")) +
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_textbox_simple(margin=margin(b=10), size = 16, color = "white"),
+    axis.title.y = element_text(color = "white"),
+    panel.background = element_rect(fill = "black"),
+    axis.line = element_line(),
+    panel.grid = element_blank(),
+    plot.background = element_rect(fill = "black", color = "black"),
+    axis.text = element_text(color = "white", size = 8)
+  )
+
+```
+
+
+# Snowfall in the Netherlands from 1955 to 2022
+
+```{r}
+neerslaggeg_De_Bilt <- read_delim("neerslaggeg_De-Bilt.csv", 
+                                  delim = ";", escape_double = FALSE, trim_ws = TRUE)
+df <- neerslaggeg_De_Bilt
+
+df <- df[-1]
+colnames(df) <- c("date", "prcp", "snow")
+df_snow <- df[-2]
+df_snow$snow[df_snow$snow %in% c(996:999)] <- 1
+df_snow <- df[-2]
+df_snow$date <- as.character(df_snow$date)
+df_snow$date <- ymd(df_snow$date)
+df_snow[is.na(df_snow)] <- 0  # Vervang NA in data met 0
+
+this_year <- year(today())
+this_month <- month(today(), label = TRUE, abbr = FALSE)
+this_day <- ordinal(day(today()))
+
+```
+
+# Graph of Snowfall in the Netherlands between 1955 to 2022
+
+```{r}
+df_snow %>% 
+  mutate(year = year(date),
+         month = month(date),
+         day = day(date)) %>% 
+  filter(!(month == 2 & day == 29)) %>% 
+  group_by(year) %>% 
+  mutate(cum_snow = cumsum(snow)) %>%
+  ungroup() %>% 
+  ggplot(aes(x=year, y=cum_snow, group = year, col = cum_snow)) +
+  geom_line(size = 4) +
+  scale_x_continuous(breaks = seq(1955, 2022, 5),
+                     labels = seq(1955, 2022, 5),
+                     limits = c(1948, 2022)) +
+  scale_color_gradient2(low = "darkred", mid = "White", high = "red",
+                       midpoint = 50) +
+  scale_y_continuous(breaks = seq(0, 300, 50),
+                     labels = seq(0, 300, 50),
+                     limits = c(0,300),
+                     expand = c(0,0)) +
+  labs(x = NULL,
+       y = "Cumulative snow (cm)",
+       title = glue("Through June 20th, the <span style = 'color: red'>cumulative</span> <span style = 'color: lightblue'>snow</span> in The Netherlands near De Bilt to {this_year}")) +
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_textbox_simple(margin=margin(b=10), size = 16, color = "white"),
+    axis.title.y = element_text(color = "white"),
+    panel.background = element_rect(fill = "black"),
+    axis.line = element_line(),
+    panel.grid = element_blank(),
+    plot.background = element_rect(fill = "black", color = "black"),
+    axis.text = element_text(color = "white", size = 8),
+    legend.background = element_rect(fill = "black"),
+    legend.text = element_text(color = "white", size = 6),
+    legend.title = element_text(color = "white"),
+    legend.position = "bottom")
+```
+
+![Graph of Snowfall in the Netherlands between 1955 to 2022](https://raw.githubusercontent.com/EdwardHill15/climate_viz/main/figures/cumulative_prcp_ne_black_snow.png)
+
+
+# 
+
+
+```{r}
+library(glue)
+library(ggtext)
+library(scales)
+library(tidyverse)
+
+pretty_labels <- c("prob_prcp" = "Probality of precipitation", 
+                  "mean_prcp" = "Average amount of\nprecipitation by day (mm)",
+                  "mean_event" = "Average amount of\nprecipitation by event (mm)")
+
+Sys.setlocale("LC_TIME", "English")
+
+today_month <- month(today())
+today_day <- day(today())
+today_date1 <- ymd(glue("2020-{today_month}-{today_day}"))
+today_date <- ymd(glue("2022-{today_month}-{today_day}"))
+
+local_weather %>% 
+  select(date, prcp) %>% 
+  mutate(day = day(date),
+         month = month(date),
+         year = year(date)) %>% 
+  drop_na(prcp) %>% 
+  group_by(month, day) %>% 
+  summarize(prob_prcp = mean(prcp > 0),
+            mean_prcp = mean(prcp),
+            mean_event = mean(prcp[prcp > 0]),
+            .groups = "drop") %>% 
+  mutate(date = ymd(glue("2020-{month}-{day}"))) %>% 
+  select(-month, -day) %>% 
+  pivot_longer(cols = c(prob_prcp, mean_prcp, mean_event)) %>% 
+  mutate(name = factor(name, levels = c("prob_prcp", "mean_prcp", "mean_event"))) %>% 
+  ggplot(aes(x=date, y=value, color = name)) +
+  geom_vline(xintercept = today_date, color = "red", size = 1) +
+  geom_line() +
+  geom_hline(yintercept = 0, color = "white") +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~name, ncol = 1, scales = "free_y", 
+             strip.position = "left",
+             labeller = labeller(name = pretty_labels)) +
+  scale_color_manual(values = c("red", "green", "dodgerblue")) +
+  scale_y_continuous(limits = c(0,NA), expand = c(0,0)) +
+  scale_x_date(date_breaks = "2 months", 
+               date_labels = "%B") +
+  coord_cartesian(clip = "off") +
+  labs(x=NULL,
+        y=NULL,
+       title = glue("<span style = 'color: pink'>Probability</span>, <span style = 'color: green'>day average precipitation</span> and <span style = 'color: dodgerblue'>event average precipitation</span>\nin The Netherlands from 1901 - {this_year}"),
+       #title = glue("Through {today_month} {today_day}, the precipitation in The Netherlands near De Bilt has a <span style = 'color: red'>probability</span> and <span style = 'color: red'>average</span> for {today_date}")) +
+       subtitle = glue("The <span style = 'color: red'>red vertical line</span> is today {today_date}"),
+       caption = "Source data: https://github.com/EdwardHill15/climate_viz") +
+  theme(
+    panel.background = element_rect(fill = "black"),
+    strip.placement = "outside",
+    strip.background = element_blank(),
+    strip.text = element_text(color = "white", size = 12), 
+    panel.grid = element_blank(),
+    plot.background = element_rect(fill = "black", color = "black"),
+    axis.line = element_line(),
+    plot.title.position = "plot",
+    plot.title = element_textbox_simple(margin=margin(b=10), size = 25, color = "white"),
+    plot.subtitle = element_textbox_simple(margin=margin(b=10), size = 15, color = "white"),
+    axis.title.y = element_text(color = "white"),
+    axis.text = element_text(color = "white", size = 12),
+    legend.background = element_rect(fill = "black"),
+    #legend.text = element_text(color = "white", size = 10),
+    #legend.title = element_text(color = "white"),
+    legend.position = "none",
+    #legend.key = element_rect(fill = "black")
+    )
+```
+
+![Precipitation in The Netherlands from 1901 - 2022](https://raw.githubusercontent.com/EdwardHill15/climate_viz/main/figures/prob_prcp_amount_ne.png)
+
+# Conclusion
+
+My conclusion based on these data is that there is light positive trend of temperature rise from 1901 to 2022 with a precipitation value slightly above the average precipitation but this doesn't support the idea of a climate-crisis based on measured temperature differences. 
