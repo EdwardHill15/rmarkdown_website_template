@@ -1,7 +1,50 @@
 ---
-title: "Panvibrational Consciousness"
+title: "Rmarkdown website template"
+author: "Edward Hillenaar"
+date: "`r format(Sys.Date())`"
 output: html_document
+email_address: totalegezondheidbv@gmail.com
+github_repo: https://github.com/EdwardHill15/rmarkdown_website_template
 ---
 
-This is what will show up on the main page.
+```{css echo=FALSE}
+.author, .title, .date {
+  display: none;
+}
+
+.main-container {
+  max-width: 100%;
+}
+
+body {
+  background-color: black;
+  color: white;
+  font-family: Helvetica;
+  font-size: 20pt;
+}
+/* Headers */
+h1{
+  font-size: 50pt;
+}
+```
+
+<center>
+<h1>Mind in a Holographic Field
+<br>
+<br>
+A Temporal Metaphysical View on the Origin and Nature of Consciousness
+<br>
+<br>
+<br>
+
+[Scientific Article](`r rmarkdown::metadata$github_repo`)
+<br>
+<br>
+by
+<br>
+<br>
+[Edward F. Hillenaar](mailto: `r rmarkdown::metadata$email_address`) 
+<br>
+<br></h1>
+Last updated on `r Sys.Date()`
 
