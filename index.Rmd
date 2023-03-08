@@ -5,6 +5,9 @@ date: "`r format(Sys.Date())`"
 output: html_document
 email_address: totalegezondheidbv@gmail.com
 github_repo: https://github.com/EdwardHill15/rmarkdown_website_template
+bibliography: ["ref.bib"]
+biblio-style: "apalike"
+link-citations: true
 ---
 
 ```{css echo=FALSE}
@@ -20,7 +23,7 @@ body {
   background-color: black;
   color: white;
   font-family: Helvetica;
-  font-size: 20pt;
+  font-size: 18pt;
 }
 /* Headers */
 h1{
@@ -29,10 +32,10 @@ h1{
 ```
 
 <center>
-<h1>Mind in a Holographic Field
+<h1>Mind in a holographic field
 <br>
 <br>
-A Temporal Metaphysical View on the Origin and Nature of Consciousness
+A temporal metaphysical view on the origin and nature of consciousness
 <br>
 <br>
 <br>
@@ -47,4 +50,30 @@ by
 <br>
 <br></h1>
 Last updated on `r Sys.Date()`
+<br>
+<br></center>
+
+# **Introduction**
+
+This ontology of mind and consciousness postulates a **reduction base** by which it can explain how an **image of the external world** is created and experienced. The **panvibrational reduction base** explains and formulates which **psycho-physical laws** are involved (f.e.; Gibson's invariance laws, optical flow fields, etc.) that explain the generation and perception of a **holographic image** of external events and happenings in, by and of the human mind. 
+
+In this ontology of mind and consciousness, the reduction base is called "**Panvibration**" and the underlying crucial psycho-physical laws were first formulated by the late psychologist James Gibson and his work on the nature and psycho-physical mechanisms of **visual perception** [@Gibson1950]. The Philosophy of Mind of Henri Bergson [@Bergson1911], [@Bergson1910a], [@Bergson1922] also plays a fundamental role in this ontological theory with the **ultimate metaphysical goal** of solving the "**Hard Problem of Consciousness**" [@Chalmers1995]. 
+ 
+Other references:  [@Chalmers1995a], [@RobertLawrenceKuhn2020]
+<br>
+<br>
+
+# **Graphs**
+
+![Correlation Matrix of behaviour factors](https://raw.githubusercontent.com/EdwardHill15/Data/main/graphs/cor_matrix_Beh_cons.png)
+<br>
+<br>
+<br>
+
+![Behaviour Factors in relation to Consciousness Levels](https://raw.githubusercontent.com/EdwardHill15/Data/main/graphs/plot_behaviour_consciousness.png)
+<br>
+<br>
+
+
+# References
 
